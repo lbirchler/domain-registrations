@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"log"
 	"os"
 	"regexp"
 	"strings"
@@ -14,14 +15,16 @@ var (
 	dateFlag            string
 	domainNameRegexFlag string
 	domainNameRegex     *regexp.Regexp
+	csvOutputFlag       string
 )
 
 func init() {
-	flag.StringVar(&dateFlag, "dates", "", "domain registration date e.g. 2021-01-01 or date range e.g. 2021-01-01,2021-01-15")
-	flag.StringVar(&domainNameRegexFlag, "regex", "", `domain name regex e.g. "^[a-zA-Z]\-[a-zA-Z0-9]{2,3}\.(xyz|club|shop|online)"`)
+	flag.StringVar(&dateFlag, "date", "", "domain registration date e.g. 2021-01-01 or date range e.g. 2021-01-01,2021-01-15")
+	flag.StringVar(&domainNameRegexFlag, "regex", "", `only return domains that match provided regex e.g. "^[a-zA-Z]\-[a-zA-Z0-9]{2,3}\.(xyz|club|shop|online)"`)
+	flag.StringVar(&csvOutputFlag, "out", "domains.csv", "csv output path")
 }
 
-func fetchDomains(lookups []Lookup) error {
+func fetchDomains(lookups []Lookup, file *CsvWriter) error {
 	errChan := make(chan error, len(lookups))
 	sem := make(chan int, 10)
 
@@ -29,7 +32,7 @@ func fetchDomains(lookups []Lookup) error {
 	wg.Add(len(lookups))
 
 	for _, lookup := range lookups {
-		go worker(lookup, sem, &wg, errChan)
+		go worker(lookup, sem, &wg, errChan, file)
 	}
 	wg.Wait()
 
@@ -37,7 +40,7 @@ func fetchDomains(lookups []Lookup) error {
 	return <-errChan
 }
 
-func worker(lookup Lookup, sem chan int, wg *sync.WaitGroup, errChan chan error) {
+func worker(lookup Lookup, sem chan int, wg *sync.WaitGroup, errChan chan error, file *CsvWriter) {
 	defer wg.Done()
 	sem <- 1
 
@@ -47,8 +50,16 @@ func worker(lookup Lookup, sem chan int, wg *sync.WaitGroup, errChan chan error)
 	}
 
 	for _, d := range doms {
-		if domainNameRegex.MatchString(d) {
-			fmt.Printf("%s\t%s\n", lookup.date, d)
+		switch domainNameRegexFlag {
+		case "":
+			record := []string{lookup.date, d}
+			file.Write(record)
+			break
+		default:
+			if lookup.regex.MatchString(d) {
+				record := []string{lookup.date, d}
+				file.Write(record)
+			}
 		}
 	}
 
@@ -59,15 +70,14 @@ func main() {
 
 	flag.Parse()
 
+	file, err := NewCsvWriter(csvOutputFlag)
+	if err != nil {
+		log.Fatalf("error creating csv file: %s\n", err)
+	}
+
 	// check if required flags were provided
 	if dateFlag == "" {
 		fmt.Println("date flag required")
-		flag.PrintDefaults()
-		os.Exit(1)
-	}
-
-	if domainNameRegexFlag == "" {
-		fmt.Println("regex flag required")
 		flag.PrintDefaults()
 		os.Exit(1)
 	}
@@ -92,11 +102,15 @@ func main() {
 	var lookups []Lookup
 	for d, p := range datesPages {
 		for i := 1; i <= p; i++ {
-			lookups = append(lookups, Lookup{d, i})
+			lookups = append(lookups, Lookup{
+				date:  d,
+				page:  i,
+				regex: domainNameRegex,
+			})
 		}
 	}
 
-	fetchDomains(lookups)
+	fetchDomains(lookups, file)
 
 }
 

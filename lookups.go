@@ -15,8 +15,9 @@ const baseURL = "https://websitebiography.com/new_domain_registrations"
 var lastPageRegex = regexp.MustCompile(`([^\/]+$)`)
 
 type Lookup struct {
-	date string
-	page int
+	date  string
+	page  int
+	regex *regexp.Regexp
 }
 
 func (l *Lookup) GetDoc() (*goquery.Document, error) {
