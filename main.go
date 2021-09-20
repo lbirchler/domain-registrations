@@ -19,9 +19,9 @@ var (
 )
 
 func init() {
-	flag.StringVar(&dateFlag, "date", "", "domain registration date e.g. 2021-01-01 or date range e.g. 2021-01-01,2021-01-15")
-	flag.StringVar(&domainNameRegexFlag, "regex", "", `only return domains that match provided regex e.g. "^[a-zA-Z]\-[a-zA-Z0-9]{2,3}\.(xyz|club|shop|online)"`)
-	flag.StringVar(&csvOutputFlag, "out", "domains.csv", "csv output path")
+	flag.StringVar(&dateFlag, "d", "", "domain registration date e.g. 2021-01-01 or date range e.g. 2021-01-01,2021-01-15")
+	flag.StringVar(&domainNameRegexFlag, "r", "", `only return domains that match provided regex e.g. "^[a-zA-Z]\-[a-zA-Z0-9]{2,3}\.(xyz|club|shop|online)"`)
+	flag.StringVar(&csvOutputFlag, "o", "domains.csv", "csv output path")
 }
 
 func fetchDomains(lookups []Lookup, file *CsvWriter) error {
@@ -111,6 +111,8 @@ func main() {
 	}
 
 	fetchDomains(lookups, file)
+
+	fmt.Printf("file saved to: %s\n", csvOutputFlag)
 
 }
 
