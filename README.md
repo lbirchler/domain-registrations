@@ -5,7 +5,7 @@ Generate csv file containing every domain registered on specified date/date rang
 go install github.com/lbirchler/domain-registrations@latest
 ```
 ## Examples 
-### All domains registered on 9/15
+All domains registered on 9/15
 ```
 $ ./domain-registrations -d 2021-09-15
 ```
@@ -27,7 +27,7 @@ $ head domains.csv
 2021-09-15,5ee2.com
 2021-09-15,5eplay-liansai.com
 ```
-### Domains registered from 9/1 to 9/7 that match regex "\ .(online|xyz)"**
+Domains registered from 9/1 to 9/7 that match regex "\ .(online|xyz)"
 ```
 $ ./domain-registrations -d 2021-09-01,2021-09-07 -r "\.(online|xyz)"
 ```
@@ -52,7 +52,7 @@ $ head domains.csv
 ## Command-line Options
 ```
   -d string
-        domain registration date e.g. 2021-01-01 
+        domain registration date e.g. 2021-01-01 or
         date range e.g. 2021-01-01,2021-01-15
   -o string
         csv output path (default "domains.csv")
