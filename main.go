@@ -111,7 +111,7 @@ func main() {
 	}
 
 	fetchDomains(lookups, file)
-
+	file.Flush()
 	fmt.Printf("file saved to: %s\n", csvOutputFlag)
 
 }
