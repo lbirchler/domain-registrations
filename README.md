@@ -7,7 +7,7 @@ go install github.com/lbirchler/domain-registrations@latest
 ## Examples 
 All domains registered on 9/15
 ```
-$ ./domain-registrations -d 2021-09-15
+$ domain-registrations -d 2021-09-15
 ```
 result:
 ```
@@ -29,7 +29,7 @@ $ head domains.csv
 ```
 Domains registered from 9/1 to 9/7 that match regex "\ .(online|xyz)"
 ```
-$ ./domain-registrations -d 2021-09-01,2021-09-07 -r "\.(online|xyz)"
+$ domain-registrations -d 2021-09-01,2021-09-07 -r "\.(online|xyz)"
 ```
 result:
 ```
